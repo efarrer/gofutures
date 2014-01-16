@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func test_AppendValueReducer_returns_empty_value_when_given_no_values(t *testing.T) {
+func Test_AppendValueReducer_returns_empty_value_when_given_no_values(t *testing.T) {
 	ar := NewAppendValueReducer(2)
 	v := ar.Values()
 	vals := v.([]interface{})
@@ -14,7 +14,7 @@ func test_AppendValueReducer_returns_empty_value_when_given_no_values(t *testing
 	}
 }
 
-func Test_AppendValueReducers_appends_values(t *testing.T) {
+func Test_AppendValueReducer_appends_values(t *testing.T) {
 	val0 := 0
 	val1 := 1
 	val2 := 2
