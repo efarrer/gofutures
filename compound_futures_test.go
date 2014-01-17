@@ -69,19 +69,19 @@ func test_generic_compound_future_behavior(ff func(...Future) Future, t *testing
 }
 
 /*
- * Test SerializeFutures
+ * Test SerializeFutureGroup
  */
-func Test_generic_SerialFuture_behavior(t *testing.T) {
+func Test_generic_SerialFutureGroup_behavior(t *testing.T) {
 	ff := func(futures ...Future) Future {
 		vr := NewAppendValueReducer(0)
 		er := NewConcatenateErrorReducer("\n")
-		return SerializeFutures(vr, er, futures...)
+		return SerializeFutureGroup(vr, er).AddFutures(futures...).Finalize()
 	}
 
 	test_generic_compound_future_behavior(ff, t)
 }
 
-func Test_SerializeFutures_serializes_futures(t *testing.T) {
+func Test_SerializeFutureGroup_serializes_futures(t *testing.T) {
 	FIRST := 1
 	SECOND := 2
 	THIRD := 3
@@ -103,7 +103,7 @@ func Test_SerializeFutures_serializes_futures(t *testing.T) {
 
 	vr := NewAppendValueReducer(0)
 	er := NewConcatenateErrorReducer("\n")
-	serial := SerializeFutures(vr, er, first, second, third)
+	serial := SerializeFutureGroup(vr, er).AddFutures(first, second, third).Finalize()
 	serial.Start()
 	serial.Results()
 
@@ -119,18 +119,18 @@ func Test_SerializeFutures_serializes_futures(t *testing.T) {
 }
 
 /*
- * Test ParallelFutures
+ * Test ParallelFutureGroup
  */
-func Test_generic_ParallelFuture_behavior(t *testing.T) {
+func Test_generic_ParallelFutureGroup_behavior(t *testing.T) {
 	ff := func(futures ...Future) Future {
 		vr := NewAppendValueReducer(0)
 		er := NewConcatenateErrorReducer("\n")
-		return ParallelFutures(vr, er, futures...)
+		return ParallelFutureGroup(vr, er).AddFutures(futures...).Finalize()
 	}
 	test_generic_compound_future_behavior(ff, t)
 }
 
-func Test_ParallelFutures_parallelizes_futures(t *testing.T) {
+func Test_ParallelFutureGroup_parallelizes_futures(t *testing.T) {
 	FIRST := 1
 	SECOND := 2
 	THIRD := 3
@@ -152,7 +152,7 @@ func Test_ParallelFutures_parallelizes_futures(t *testing.T) {
 
 	vr := NewAppendValueReducer(0)
 	er := NewConcatenateErrorReducer("\n")
-	serial := ParallelFutures(vr, er, first, second, third)
+	serial := ParallelFutureGroup(vr, er).AddFutures(first, second, third).Finalize()
 	serial.Start()
 	serial.Results()
 
