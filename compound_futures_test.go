@@ -89,23 +89,23 @@ func Test_SerializeFutureGroup_serializes_futures(t *testing.T) {
 	first := NewFuncFuture(func() (interface{}, error) {
 		<-time.After(30 * time.Millisecond)
 		ch <- FIRST
-		return nil, nil
+		return FIRST, nil
 	})
 	second := NewFuncFuture(func() (interface{}, error) {
 		<-time.After(20 * time.Millisecond)
 		ch <- SECOND
-		return nil, nil
+		return SECOND, nil
 	})
 	third := NewFuncFuture(func() (interface{}, error) {
 		ch <- THIRD
-		return nil, nil
+		return THIRD, nil
 	})
 
 	vr := NewAppendValueReducer(0)
 	er := NewConcatenateErrorReducer("\n")
 	serial := SerializeFutureGroup(vr, er).AddFutures(first, second, third).Finalize()
 	serial.Start()
-	serial.Results()
+	values, _ := serial.Results()
 
 	if val := <-ch; FIRST != val {
 		t.Fatalf("Expected first value but got %v\n", val)
@@ -115,6 +115,13 @@ func Test_SerializeFutureGroup_serializes_futures(t *testing.T) {
 	}
 	if val := <-ch; THIRD != val {
 		t.Fatalf("Expected third value but got %v\n", val)
+	}
+
+	valueSlice := values.([]interface{})
+	if valueSlice[0].(int) != FIRST ||
+		valueSlice[1].(int) != SECOND ||
+		valueSlice[2].(int) != THIRD {
+		t.Fatalf("Expected [%v %v %v] but got %v\n", FIRST, SECOND, THIRD, valueSlice)
 	}
 }
 
@@ -138,23 +145,23 @@ func Test_ParallelFutureGroup_parallelizes_futures(t *testing.T) {
 	first := NewFuncFuture(func() (interface{}, error) {
 		<-time.After(30 * time.Millisecond)
 		ch <- FIRST
-		return nil, nil
+		return FIRST, nil
 	})
 	second := NewFuncFuture(func() (interface{}, error) {
 		<-time.After(20 * time.Millisecond)
 		ch <- SECOND
-		return nil, nil
+		return SECOND, nil
 	})
 	third := NewFuncFuture(func() (interface{}, error) {
 		ch <- THIRD
-		return nil, nil
+		return THIRD, nil
 	})
 
 	vr := NewAppendValueReducer(0)
 	er := NewConcatenateErrorReducer("\n")
 	serial := ParallelFutureGroup(vr, er).AddFutures(first, second, third).Finalize()
 	serial.Start()
-	serial.Results()
+	values, _ := serial.Results()
 
 	if val := <-ch; THIRD != val {
 		t.Fatalf("Expected third value but got %v\n", val)
@@ -164,5 +171,12 @@ func Test_ParallelFutureGroup_parallelizes_futures(t *testing.T) {
 	}
 	if val := <-ch; FIRST != val {
 		t.Fatalf("Expected first value but got %v\n", val)
+	}
+
+	valueSlice := values.([]interface{})
+	if valueSlice[0].(int) != FIRST ||
+		valueSlice[1].(int) != SECOND ||
+		valueSlice[2].(int) != THIRD {
+		t.Fatalf("Expected [%v %v %v] but got %v\n", FIRST, SECOND, THIRD, valueSlice)
 	}
 }
